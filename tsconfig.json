@@ -13,6 +13,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "types": ["./src/types/chrome-ai.d.ts"],
     "plugins": [
       {
         "name": "next"

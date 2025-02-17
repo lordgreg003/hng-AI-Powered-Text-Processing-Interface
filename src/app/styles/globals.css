@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Reset default margins/padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Container for the entire app */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+/* Message display area */
+.message-container {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+/* Individual message bubbles */
+.message {
+  background-color: #f0f0f0;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+/* Input area styling */
+.input-area {
+  display: flex;
+  gap: 10px;
+}
+
+textarea {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  resize: vertical;
+  min-height: 100px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0051a2;
+}
+
+/* Responsive design for mobile */
+@media (max-width: 600px) {
+  .input-area {
+    flex-direction: column;
+  }
+
+  textarea {
+    min-height: 80px;
+  }
+}
+
+/* Language info and action buttons */
+.language-info {
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 5px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.language-select {
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.summarize-btn {
+  background-color: #4caf50; /* Green */
+}
+
+.translate-btn {
+  background-color: #9c27b0; /* Purple */
+}

@@ -1,101 +1,138 @@
-import Image from "next/image";
+"use client";
+import { useState } from "react";
+import { mockAI } from "@/utils/mock-ai";
+
+type Message = {
+  text: string;
+  detectedLang?: string;
+  summary?: string;
+  translation?: string;
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [inputText, setInputText] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [targetLang, setTargetLang] = useState("en");
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [isSummarizing, setIsSummarizing] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  // Use real APIs if available, else mocks
+  const ai = typeof window !== "undefined" && window.ai ? window.ai : mockAI;
+
+  const handleSend = async () => {
+    if (!inputText.trim()) return;
+
+    const newMessage: Message = { text: inputText };
+    setMessages([...messages, newMessage]);
+
+    setIsDetecting(true);
+    try {
+      const detection = await ai.detectLanguage(inputText);
+      newMessage.detectedLang = detection.languageCode;
+      setMessages((prev) => [...prev.slice(0, -1), newMessage]);
+    } catch (error) {
+      alert("Language detection failed. Please try again.");
+    } finally {
+      setIsDetecting(false);
+      setInputText("");
+    }
+  };
+
+  const handleSummarize = async (messageIndex: number) => {
+    setIsSummarizing(true);
+    try {
+      const textToSummarize = messages[messageIndex].text;
+      const summaryResult = await ai.summarize(textToSummarize);
+      const updatedMessages = [...messages];
+      updatedMessages[messageIndex].summary = summaryResult.summary;
+      setMessages(updatedMessages);
+    } catch (error) {
+      alert("Summarization failed. Please try again.");
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
+  const handleTranslate = async (messageIndex: number) => {
+    setIsTranslating(true);
+    try {
+      const textToTranslate = messages[messageIndex].text;
+      const translationResult = await ai.translate(textToTranslate, {
+        targetLang: targetLang,
+      });
+      const updatedMessages = [...messages];
+      updatedMessages[messageIndex].translation = translationResult.translation;
+      setMessages(updatedMessages);
+    } catch (error) {
+      alert("Translation failed. Please try again.");
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  return (
+    <div className="container">
+      {/* Messages display */}
+      <div className="message-container">
+        {messages.map((msg, index) => (
+          <div key={index} className="message">
+            <p>{msg.text}</p>
+
+            {msg.detectedLang && (
+              <small>Detected language: {msg.detectedLang}</small>
+            )}
+
+            <div className="action-buttons">
+              {msg.detectedLang === "en" && msg.text.length > 150 && (
+                <button
+                  onClick={() => handleSummarize(index)}
+                  disabled={isSummarizing}
+                >
+                  {isSummarizing ? "Summarizing..." : "Summarize"}
+                </button>
+              )}
+
+              <select
+                value={targetLang}
+                onChange={(e) => setTargetLang(e.target.value)}
+              >
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru">Russian</option>
+                <option value="tr">Turkish</option>
+                <option value="fr">French</option>
+              </select>
+
+              <button
+                onClick={() => handleTranslate(index)}
+                disabled={isTranslating}
+              >
+                {isTranslating ? "Translating..." : "Translate"}
+              </button>
+            </div>
+
+            {msg.summary && <div className="summary">{msg.summary}</div>}
+            {msg.translation && (
+              <div className="translation">{msg.translation}</div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Input area */}
+      <div className="input-area">
+        <textarea
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          placeholder="Type your text..."
+          disabled={isDetecting}
+        />
+        <button onClick={handleSend} disabled={isDetecting}>
+          {isDetecting ? "Detecting Language..." : "Send"}
+        </button>
+      </div>
     </div>
   );
 }
