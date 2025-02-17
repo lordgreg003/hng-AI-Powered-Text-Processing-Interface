@@ -33,6 +33,8 @@ export default function Home() {
       setMessages((prev) => [...prev.slice(0, -1), newMessage]);
     } catch (error) {
       alert("Language detection failed. Please try again.");
+      console.log(error);
+      
     } finally {
       setIsDetecting(false);
       setInputText("");
@@ -49,6 +51,7 @@ export default function Home() {
       setMessages(updatedMessages);
     } catch (error) {
       alert("Summarization failed. Please try again.");
+      console.log(error);
     } finally {
       setIsSummarizing(false);
     }
@@ -66,6 +69,7 @@ export default function Home() {
       setMessages(updatedMessages);
     } catch (error) {
       alert("Translation failed. Please try again.");
+      console.log(error);
     } finally {
       setIsTranslating(false);
     }
